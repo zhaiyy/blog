@@ -2,8 +2,6 @@
 =========================
  <div style="text-align: right">  2020/7/9 </div>
  
-[TOC]
-
 # 前言
 ![avatar](./../image/loader/图片1.png)
 webpack 能把左侧各种类型的文件（webpack 把它们叫作「模块」）统一打包为右边被通用浏览器支持的文件
@@ -71,5 +69,69 @@ loader支持链式调用
             // 告诉 webpack 该去那个目录下找 loader 模块
             modules: ['node_modules', path.resolve(__dirname, 'config')]
         }
+
+```
+Webpack 规定 use 数组中 Loader 的执行顺序是从最后一个到第一个，它们符合下面这些规则：
+* 顺序最后的 Loader 第一个被调用，它拿到的参数是 source 的内容
+* 顺序第一的 Loader 最后被调用， Webpack 期望它返回 JS 代码
+```javascript
+// 处理顺序排在最后的 loader 
+module.exports = function (source) { 
+// 这个 loader 的功能是把源模块转化为字符串交给 require 的调用方 
+      return 'module.exports = ' + JSON.stringify(source); 
+} 
+
+```
+* 夹在中间的 Loader 被链式调用，他们拿到上个 Loader 的返回值，为下一个 loader 提供输入。
+```javascript
+module.exports = function (source) { 
+// 处理 source ... 
+     this.callback(null, handledSource) 
+     return handledSource; 
+} 
+
+```
+如果是单个处理结果，可以在同步模式中直接返回。如果有多个处理结果，则必须调用 this.callback() 
+```javascript
+this.callback( 
+    err: Error | null, 
+    content: string | Buffer, 
+    sourceMap?: SourceMap, 
+    meta?: any 
+); 
+
+```
+    第一个参数必须是 Error 或者 null
+    第二个参数是一个 string 或者 Buffer。
+    可选的：第三个参数必须是一个可以被这个模块解析的 source map。
+    可选的：第四个选项，会被 webpack 忽略，可以是任何东西（例如一些元数据）。
+
+# Loader开发
+简单写一个html 压缩loader
+```javascript
+var Minimize = require('minimize');
+var loaderUtils = require('loader-utils');
+module.exports = function(source) {
+    var options = loaderUtils.getOptions(this) || {};
+    var minimize = new Minimize(options);
+    return minimize.parse(source);
+};
+
+```
+引用方式
+```javascript
+rules: [
+         {
+            test: /\.html$/,
+            use: ['html-loader',
+              {
+                loader: 'html-minify-loader',
+                options: {
+                  comments: false
+                }
+              }
+             ]
+       }
+]
 
 ```
