@@ -1,6 +1,7 @@
 # 如何开发 Webpack loader 
+ <div style="text-align: right">  2020/7/9 </div>
 ## 前言
-![avatar](../博客文章/图片1.png)
+![avatar](./../image/loader/图片1.png)
 webpack 能把左侧各种类型的文件（webpack 把它们叫作「模块」）统一打包为右边被通用浏览器支持的文件
 ## 什么是 Loader ？
 所谓 loader 只是一个导出为函数的 JavaScript 模块，是集成到webpack的文件处理方法，这些loader在webpack打包过程中，可以对指定类型的文件进行相应的处理，比如把less语法转换成浏览器可以识别的css语法，引入特定类型的文件（html），在js 模块直接import css 文件等等。
@@ -50,7 +51,7 @@ rules: [
 
 ```
 控制台运行结果
-![avatar](../博客文章/控制台运行结果.png)
+![avatar](./../image/loader/控制台运行结果.png)
 ## Loader-链式操作
 loader支持链式调用
 ```javascript
