@@ -135,3 +135,106 @@ rules: [
 ]
 
 ```
+运行结果
+![avatar](./../image/loader/html-loader01.png)
+![avatar](./../image/loader/htmlloader01.png)
+
+## Loader开发进阶-异步
+ loader 写成异步的方式，这样不会阻塞其他编译进度。在异步模式中，必须调用 this.async()，来指示 loader runner 等待异步结果，它会返回 this.callback() 回调函数，随后 loader 必须返回 undefined 并且调用该回调函数。 
+```javascript
+var Minimize = require('minimize');
+var loaderUtils = require('loader-utils');
+module.exports = function(source) {
+    var callback = this.async();
+    var options = loaderUtils.getOptions(this) || {};
+    var minimize = new Minimize(options);
+    return callback(null, minimize.parse(source));
+};
+
+```
+## Loader开发进阶-缓存
+Webpack Loader 同样可以利用缓存来提高效率，并且只需在一个可缓存的 Loader 上加一句 this.cacheable(); 
+默认情况下，loader 的处理结果会被标记为可缓存。调用这个方法然后传入 false，可以关闭 loader 的缓存。
+```javascript
+module.exports = function(source) {
+    var callback = this.async();
+    if (this.cacheable) {
+        this.cacheable();
+    }
+    var options = loaderUtils.getOptions(this) || {};
+    var minimize = new Minimize(options);
+    return callback(null, minimize.parse(source));
+};
+
+```
+## Loader开发进阶-校验传入的options
+我们可以用 schema-utils 提供的工具，获取用于校验 options 的 JSON Schema 常量，从而校验 loader options。
+
+validate()第一个参数是校验的json 第二个参数是loader传入的options 第三个参数是当前loader的名称
+
+当前规定 传入的options必须是一个对象 他里面的comments的值必须是一个布尔值 如果不满足要求则会报错
+![avatar](./../image/loader/options.png)
+```javascript
+const validate = require('schema-utils');
+let json = {
+    "type": "object",
+    "properties": {
+        "comments": {
+            "type": "boolean",
+        }
+    }
+}
+module.exports = function(source) {
+    var callback = this.async();
+    if (this.cacheable) {
+        this.cacheable();
+    }
+    var options = loaderUtils.getOptions(this) || {};
+    const isValid= validate(json, options, 'html-minify-loader');
+    if(isValid) {
+        var minimize = new Minimize(options);
+        return callback(null, minimize.parse(source));
+    } else {
+        return callback(new Error('options 参数配置错误'))
+    }
+};
+
+```
+## Loader开发进阶-善用this
+Loader API 将提供给每一个 Loader 的 this 中，API 可以让我们的调用方式更加地方便，更加灵活。 
+this.context：当前处理文件的所在目录，假如当前 Loader 处理的文件是 /src/main.js，则 this.context 就等于 /src。
+this.resource：当前处理文件的完整请求路径，包括 querystring，例如 /src/main.js?name=1。
+this.resourcePath：当前处理文件的路径，例如 /src/main.js。
+this.resourceQuery：当前处理文件的 querystring。
+this.loadModule：但 Loader 在处理一个文件时，如果依赖其它文件的处理结果才能得出当前文件的结果时， 就可以通过 this.loadModule(request: string, callback: function(err, source, sourceMap, module)) 去获得 request 对应文件的处理结果。
+……
+https://www.webpackjs.com/api/loaders/#this-callback
+
+# 项目体验
+开发一个loader，把后缀位 .webp 文件同意转换成 .png
+```JAVASCRIPT
+const WEBP_REGEX = /\.webp$/i
+const WEBP_IMAGE_REGEX= /(https?)?\/\/[-A-Za-z0-9+&@#\\/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|].webp/i
+function replaceWebp (url, isDynamic, suffix) {
+    let suf = suffix || (isDynamic ? '.gif' : '.png')
+    return url.replace(WEBP_REGEX, suf)
+  }
+  
+module.exports = function(source) {
+    const callback = this.async()
+    if (this.cacheable) {
+        this.cacheable();
+    }
+    const imageReg = WEBP_IMAGE_REGEX.exec(source)
+    if(imageReg) {
+        const [url] = imageReg
+        source = source.replace(url, replaceWebp(url))
+    }
+    return callback(null, source)
+};
+
+```
+# 参考文档
+  * http://www.weqianduan.com/2018/09/26/style-loader-and-css-loader/
+  * https://juejin.im/post/5accd3aa6fb9a028dd4e91d3
+  * http://www.alloyteam.com/2016/01/webpack-loader-1/
