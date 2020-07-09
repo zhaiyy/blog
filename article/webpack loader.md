@@ -39,6 +39,7 @@ module.exports = function(source) {
 第一个 loader 的传入参数只有一个source： 资源文件(resource file)的内容
 
 第一个loader 引入实例
+
 ```javascript
 rules: [
            {
@@ -111,7 +112,7 @@ this.callback(
 ```javascript
 var Minimize = require('minimize');
 var loaderUtils = require('loader-utils');
-module.exports = function(source) {
+module.exports = function(source) {
     var options = loaderUtils.getOptions(this) || {};
     var minimize = new Minimize(options);
     return minimize.parse(source);
@@ -133,7 +134,7 @@ rules: [
              ]
        }
 ]
-
+w
 ```
 运行结果
 ![avatar](./../image/loader/html-loader01.png)
@@ -211,11 +212,11 @@ this.loadModule：但 Loader 在处理一个文件时，如果依赖其它文件
 https://www.webpackjs.com/api/loaders/#this-callback
 
 # 项目体验
-开发一个loader，把后缀位 .webp 文件同意转换成 .png
+开发一个loader，把后缀位 .webp 文件转换成 .png
 ```JAVASCRIPT
 const WEBP_REGEX = /\.webp$/i
 const WEBP_IMAGE_REGEX= /(https?)?\/\/[-A-Za-z0-9+&@#\\/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|].webp/i
-function replaceWebp (url, isDynamic, suffix) {
+function replaceWebp (url, isDynamic, suffix) {
     let suf = suffix || (isDynamic ? '.gif' : '.png')
     return url.replace(WEBP_REGEX, suf)
   }
