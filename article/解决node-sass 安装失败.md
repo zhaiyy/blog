@@ -77,6 +77,10 @@ Dart Sass 是 Sass 的主要实现版本，这意味着它集成新 功能要早
  纯 JS 版本 比独立版本执行速度慢，但是它很容易集成到 现有的工作流中，并且允许你通过 JavaScript 自定义函数和 importer。
 
  通过 npm 安装时，Dart Sass 提供了一个 JavaScript API 用于 兼容 Node Sass。 完全兼容的工作正在进行中，但是 Dart Sass 目前支持 render() 和 renderSync() 函数。不过，请注意，默认情况下 renderSync() 的速度是 render() 的两倍以上，这是由于 异步回调所带来的开销而导致的。
+
+ dart-sass进行构建，它能在保证性能的前提下大大简化用户的安装成本。通过这个 issue下面相关的评论就可以知道，安装 node-sass 是多么麻烦的一件事。
+
+ 这里选择使用dart-sass还有一个更主要的原因，sass官方已经将dart-sass作为未来主要的的开发方向了，有任何新功能它都是会优先支持的，而且它已经在社区里稳定运行了很长的一段时间，基本没有什么坑了。dart-sass之所以容易安装，主要是因为它会被编译成纯 js，这样就可以直接在的 node 环境中使用。虽然这样它的运行速度会比基于 libsass的慢一些些，但这些速度的差异几乎可以忽略不计。整个社区现在都在拥抱dart-sass，我们没有理由拒绝！而且它的确大大简化了用户的安装成本
  ## 如何无缝从node-sass 切换到 drat-sass
  1. 删除项目原有的node_modlues 其主要目的是防止卸载node-sass 过程中代码异常
 
@@ -100,3 +104,36 @@ Dart Sass 是 Sass 的主要实现版本，这意味着它集成新 功能要早
     ....
     }
     ```
+经过以上步骤，然后自信满满的执行
+然后有一次被现实打败了
+![](./../image/node-sass/error.png)
+报错了，从提示信息看，应该是不能解析`/deep/`
+
+替换 node-sass 之后有一个地方需要注意，就是它不再支持之前 sass 的那种 /deep/ 写法，需要统一改为 ::v-deep 的写法
+
+具体 demo：
+
+``` css
+.a {
+  /deep/ {
+    .b {
+      color: red;
+    }
+  }
+}
+
+/* 修改为 */
+.a {
+  ::v-deep {
+    .b {
+      color: red;
+    }
+  }
+}
+```
+然后终于完美解决
+晚上加鸡腿，撒花
+
+# 参考文章
+* [drat sass 官网](https://www.sasscss.com/dart-sass)
+* [Node Sass to Dart Sass](https://panjiachen.github.io/vue-element-admin-site/zh/guide/advanced/sass.html#%E5%8D%87%E7%BA%A7%E6%96%B9%E6%A1%88)
