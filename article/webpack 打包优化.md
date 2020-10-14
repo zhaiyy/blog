@@ -277,7 +277,7 @@ happypack把任务分解给多个子进程去并发的执行，子进程处理�
 ```
  {
             test: /\.js$/,
-            include: [srcPath, iqiyiPath],
+            include: [srcPath, npmPath],
             exclude: /(node_modules|bower_components)/,
             loader: 'happypack/loader?id=babel'
         },
