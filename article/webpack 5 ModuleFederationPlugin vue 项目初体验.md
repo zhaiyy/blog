@@ -171,6 +171,7 @@ export default {
 </script>
 ```
 远程组件的引入**一定要注意代码的异步**，可以直接使用上面的异步组件的加载方式，也可以使用 async/await 方式 动态加载组件。
+
 现在我们看一下app2的页面效果
 
 ![](../image/webpack/app2.png)
@@ -179,6 +180,7 @@ export default {
 
 # 实现流程
 app1 与app2 都有自己独有的modules, 所以实现的关键就是两个项目的modules 是如何同步，或者说app1中的组件是如何注入app2 中的。那我们你就来看一下Module federation 是如何实现的。
+
 我们首先看一下app2 访问时的文件是如何请求的。
 
 ![](../image/webpack/app2-network.png)
@@ -203,6 +205,7 @@ module.exports = new Promise((resolve, reject) => {
 
 ```
 导出了一个异步函数，去请求了我们配置的app1 的入口文件，获取到remoteEntry.js 返回参数
+
 接下来看一下app1/remoteEntry.js 
 ```js
 var app1;app1 =
@@ -279,10 +282,13 @@ var render = function() {
 通过上述我们可以简单总结，跨项目代码共享，要求需要共享的项目代码根据配置文件的导出模块，进行单独打包，生成对应的modules,然后通过一个全局变量建立起两个不同项目之间的连接。
 # 适用范围
 适用于新建专门的组件应用服务来管理全部组件和应用，其余业务层只须要根据本身业务所需载入对应的组件和功能模块便可。
+
 模块管理统一管理，代码质量高，搭建速度快。
 特别适用矩阵app，或者可视化页面搭建等场景。
 （本地应用和远程应用的技术栈和版本必须兼容，统一用同一套。）
  # 参考文章
  [webpack 5 官方文档](https://webpack.docschina.org/migrate/5/)
+
  [探索webpack5新特性Module-federation](https://juejin.im/post/6844904133837717511)
+
  [Webpack 5 Module Federation: JavaScript 架构的变革者](https://zhuanlan.zhihu.com/p/120462530)
