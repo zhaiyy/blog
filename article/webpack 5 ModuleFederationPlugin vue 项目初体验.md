@@ -51,6 +51,7 @@ Module Federation 整体是通过ModuleFederationPlugin这个插件串联起来�
 项目构建之后的产物
 
 ![](../image/webpack/build.png)
+
 * main.js，应用主文件；
 * remoteEntry.js，作为 remote 时被引的文件；
 * src_components_Header_vue.js 异步加载的文件，main.js 或 remoteEntry.js 里可能加载的文件；
@@ -133,6 +134,7 @@ module.exports = {
 ```
 重新启动app1,我们直接访问 http://localhost:3000/remoteEntry.js
 ![](../image/webpack/remoteEnty.png)
+
 访问到及配置成功
 
 ## app2 引入app1模块
@@ -172,6 +174,7 @@ export default {
 现在我们看一下app2的页面效果
 
 ![](../image/webpack/app2.png)
+
 是不是配置很简单，是不是真香
 
 # 实现流程
