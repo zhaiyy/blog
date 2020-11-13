@@ -8,3 +8,4 @@
 * [下一代 Web 应用应用模型Progressive Web App（PWA）- Service Worker](https://github.com/zhaiyy/blog/blob/master/article/%EF%BC%88PWA%EF%BC%89-%20Service%20Worker%20copy.md)
 * [Javascript 函数式编程](./article/Javascript%20函数式编程.md)
 * [webpack 打包优化](./article/webpack%20打包优化.md)
+* [前端知识点总结，面试必备](https://github.com/zhaiyy/Web-front-end-knowledge-summary)
