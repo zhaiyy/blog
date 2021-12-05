@@ -2,7 +2,7 @@
  * @Author: zhaiyingying001
  * @Date: 2021-12-05 15:05:13
  * @LastEditors: zhaiyingying001
- * @LastEditTime: 2021-12-05 16:45:58
+ * @LastEditTime: 2021-12-05 18:00:09
  * @Description: 文件描述
 -->
 《React fiber 原理》
@@ -147,6 +147,68 @@ export default class Index extends React.Component{
 ```
 fiber对应的关系如下
 ![](../image/fiber/fiber-dom.png)
+
+## Fiber初始化与更新机制
+
+每次渲染有两个阶段：Reconciliation（协调render）阶段和Commit（提交）阶段
+
+### 第一步：创建fiberRoot
+
+协调render阶段：在render阶段，React将更新应用于通过setState或render方法触发的组件，并确定需要在用户屏幕上做哪些更新--哪些节点需要插入，更新或删除，哪些组件需要调用其生命周期方法。最终的这些更新信息被保存在一个叫effect list的fiber 节点树上。当然，在首次渲染时，React不需要产生任何更新信息，而是会给每个从render方法返回的element生成一个fiber节点，最终生成一个fiber节点树， 后续的更新也是复用了这棵fiber树。
+源码：`packages/react-reconciler/src/ReactFiberRoot.new.js` createFiberRoot
+![](../image/fiber/截屏2021-12-05%2017.25.37.png)
+最终生成
+![](../image/fiber/截屏2021-12-05%2017.31.57.png)
+
+## 第二步：workInProgress和current
+经过第一步的处理，开始到正式渲染阶段.
+commit阶段：commit阶段会遍历effect list，把所有更新都commit到DOM树上。具体的，首先会有一个pre-commit阶段，主要是执行getSnapshotBeforeUpdate方法，可以获取当前DOM的快照（snap）。然后给需要卸载的组件执行componentWillUnmount方法。接着会把current fiber tree 替换为workInProgress fiber tree。最后执行DOM的插入、更新和删除，给更新的组件执行componentDidUpdate，给插入的组件执行componentDidMount。
+在这个阶段时，React内部会有三个fiber树：
+
+* current 树: 在首次渲染时，React不需要产生任何更新信息，而是会给每个从render方法返回的element生成一个fiber节点，最终生成一个fiber节点树， 后续的更新也是复用了这棵fiber树。正在视图层渲染的树叫做 current 树。
+
+* workInProgress 树: 正在内存中构建的 Fiber 树称为 workInProgress Fiber 树。在一次更新中，所有的更新都是发生在 workInProgress 树上。在一次更新之后，workInProgress 树上的状态是最新的状态，那么它将变成 current 树用于渲染视图。
+
+源码： `packages/react-reconciler/src/ReactFiber.new.js`
+rootFiber 的渲染流程，首先会复用当前 current 树（ rootFiber ）的 alternate 作为 workInProgress ，如果没有 alternate （初始化的 rootFiber 是没有 alternate ），那么会创建一个 fiber 作为 workInProgress 。会用 alternate 将新创建的 workInProgress 与 current 树建立起关联。这个关联过程只有初始化第一次创建 alternate 时候进行。
+
+```js
+// This is used to create an alternate fiber to do work on.
+...
+export function createWorkInProgress(current: Fiber, pendingProps: any): Fiber {
+  let workInProgress = current.alternate;
+  if (workInProgress === null) {
+    workInProgress = createFiber(
+      current.tag,
+      pendingProps,
+      current.key,
+      current.mode,
+    );
+    workInProgress.elementType = current.elementType;
+    workInProgress.type = current.type;
+    workInProgress.stateNode = current.stateNode;
+    ...
+    workInProgress.alternate = current;
+    current.alternate = workInProgress;
+  } else {
+   ...
+  }
+
+```
+效果：
+![](.../../../image/fiber/截屏2021-12-05%2017.54.20.png)
+
+### 第三步：深度调和子节点，渲染视图
+最后会以 workInProgress 作为最新的渲染树，fiberRoot 的 current 指针指向 workInProgress 使其变为 current Fiber 树。到此完成初始化流程。
+效果：
+![](../image/fiber/截屏2021-12-05%2017.56.15.png)
+
+## 更新
+如果对于上述 demo ，开发者点击一次按钮发生更新，接下来会发生什么呢? 首先会走如上的逻辑，重新创建一颗 workInProgresss 树，复用当前 current 树上的 alternate ，作为新的 workInProgress ，由于初始化 rootfiber 有 alternate ，所以对于剩余的子节点，React 还需要创建一份，和 current 树上的 fiber 建立起 alternate 关联。渲染完毕后，workInProgresss 再次变成 current 树。
+![](.../../../image/fiber/截屏2021-12-05%2017.59.30.png)
+* effect list fiber tree: workInProgress fiber tree 的子树，这个树的作用串联了标记具有更新的节点
+
+
 
 
 
