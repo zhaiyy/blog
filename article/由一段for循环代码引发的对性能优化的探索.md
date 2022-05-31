@@ -7,6 +7,7 @@
  ![](../image/js-for/20220530-144445@2x.png)
 
  dom解析耗时较长无外乎DOM操作会导致一系列的重绘（repaint）、重新排版（reflow）操作，可能原因有：
+ 
  1、页面dom 节点过多，DOM 节点的数量越多，构建 DOM 树所需的时间就越长
  2、DOM元素的添加、修改（内容）、删除( Reflow + Repaint)
  3、仅修改DOM元素的字体颜色
@@ -176,12 +177,17 @@ for (let i = 0; i < cityData.length; i++) {
 
 ![](../image/js-for/20220530-214850@2x.png)
 
+整体优化完以数组最大长度做对比，比上一次优化数据提升 18.5%，比初始数据提高 40.27%。
+
 当数组长度为34034时，执行耗时已经进入30ms以内
+
 new Array(cityData.length) 与 [] 有什么区别呢？为啥这个小小的改变能够带来如此的性能提升呢？
+
 根据 ECMA 标准，Array 初始的时候let arr = []（或者）let arr = new Array() 与 let arr = new Array(size)没有本质的区别，只是后者的数组实例的 length 的 赋值为 size。但是在写入数组的过程中，会频繁的修改数组实例的 length 属性。由于初始的内存池比较小，在频繁的修改数组length的同时发生了频繁的内存分配，因此导致了性能的损耗。
 
 # 直接使用map耗时分析
 直接使用map可以简化代码，是代码可独享更高。但众所周知，由于map操作会进行回调，并创造一个新的数组返回，占用内存而且map 还需要考虑很多极端情况，比如 getter、稀疏数组和检查传递的参数是否是数组，这会增加开销，因此在数组操作中for 循环的性能要优于map 的性能。我们进行一下数据对比
+
 [具体代码请参考](https://github.com/zhaiyy/exercise/blob/master/js-for%E5%BE%AA%E7%8E%AF%E6%A1%88%E4%BE%8B/map.js)
 
 ```js
@@ -199,22 +205,31 @@ const arr1 = cityData.map(({ name, citys }) => {
   })
 ```
 ![](../image/js-for/20220530-223333@2x.png)
+
 从数据上看，比for 循环结果会有细微的增大，我们把数组长度变大在对比一下
+
 ![](../image/js-for/20220530-231447@2x.png)
+
 整体上还是有17ms 的差值，所以从数据上也可以印证for循环要比map的性能更高
 
 # 结论
 针对以上的优化分析，我们可得出以下几条优化方案：
+
 1、针对可复用的变量属性进行赋值，设置缓存
+
 2、针对 obj 减少对象元素的赋值，尽可能的在初始化的时候完成
+
 3、针对数据量较大的数组进行初始化，需要给数组的每个元素分配好空间，减少后续的内存分配带来的性能损耗
+
 4、针对数据量较大的数据，减少map高阶函数的使用。但对于数据量较小的数组操作，建议使用map属性，简化代码提高可读性。
 
 
 # 为什么使performance.now，不使用 console.time
 ## console.time和console.timeEnd 
 console.time和console.timeEnd是用来测试一段js代码执行时间的。比如：
+
 是用来测试一段js代码执行时间的
+
 ```js
 console.time('优化前耗时')
 ...
@@ -238,3 +253,6 @@ console.log(performance.now()- t0);
 最终使用performance 原因：
 1、数据更精准
 2、可以进行批量计算求平均值。console.time 只能手动执行进行数据统计，效率低。
+
+
+注：不同机器，node 版本，浏览器版本均会对数据有影响。本文测试的所有数据环境：node v12.13.1
