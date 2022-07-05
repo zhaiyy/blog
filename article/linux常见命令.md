@@ -3,11 +3,11 @@
 tar在linux上是常用的打包、压缩、加压缩工具，他的参数很多，这篇文章仅仅列举常用的压缩与解压缩参数，下面直接先上三个常用命令
 1、压缩当前目录下文件夹/文件test到test.tar.gz:
 
-tar -zcvf test.tar.gz test
+`tar -zcvf test.tar.gz test`
 
 2、解压缩当前目录下的file.tar.gz到file:
 
-tar -zxvf file.tar.gz
+`tar -zxvf file.tar.gz`
 
 五个命令中必选一个
 
@@ -39,16 +39,24 @@ tar -zxvf file.tar.gz
 Pigz就是支持并行压缩的gzip。Pigz默认用当前逻辑cpu个数来并发压缩，无法检测个数的话，则默认并发8个线程，也可以使用-p指定线程数。需要注意的是其CPU使用比较高。
 pigz常用命令参数：
 
--p: 设置最大使用线程数量，默认所有在线cpu，如果不能获取cpu数量，则取8
--b：设置压缩块大小，默认128k
--d：解压缩
--q：静默模式，不输出任何信息
--k：不删除原始文件
--l：输出压缩内容
--r：递归子目录
--S：使用sss后缀替换gz
--v：输出详细信息
+     -p: 设置最大使用线程数量，默认所有在线cpu，如果不能获取cpu数量，则取8
+     
+     -b：设置压缩块大小，默认128k
+     
+     -d：解压缩
+     
+     -q：静默模式，不输出任何信息
+     
+     -k：不删除原始文件
+     
+     -l：输出压缩内容
+     
+     -r：递归子目录
+     
+     -S：使用sss后缀替换gz
+     
+     -v：输出详细信息
 
 使用方式：
 
-tar -cvf - dir1 dir2 dir3 | pigz -p 8 > output.tgz
+`tar -cvf - dir1 dir2 dir3 | pigz -p 8 > output.tgz`
